@@ -1,0 +1,332 @@
+---
+title: "DSA 8010 Mini Project 2"
+author: "Sarah Hunt, Nate Hanrahan, Spain Powell, Dana Tate"
+date: "2023-11-21"
+output: 
+  html_document:
+    df_print: paged
+    toc: true
+    toc_depth: 2
+    toc_float: true
+    code_download: true
+---
+
+# Introduction to Mini Project 2
+
+The group decided to work with Q1: groceries and Q3: teen dating violence.
+For each of these questions, we created a detailed descriptive summary of the data using graphs and other statistical summaries, hypotheses, tested the hypotheses with various methods, and summarized our findings. 
+
+# Question 1: Groceries
+
+The data set ‘grocery_prices2.csv’ has dimensions 29 by 3. Where there are 29 rows and 3 variables which are described as: 
+
+1. Item - a string record describing the item of interest along with its unit of measurement
+
+2. WinCo - a type double numeric record giving the price in dollars and of the associated item at the Winco grocery store
+
+3. Wal.Mart - a type double numeric record giving the price in dollars of the associated item at the Walmart grocery store.
+
+
+Here is a peek at the data set
+```{r, echo=FALSE, message=FALSE}
+library(readr)
+grocery <- read_csv("grocery_prices2.csv")
+head(grocery)
+```
+
+## Initial Summary Statistics for Q1 {.tabset}
+First, we performed summary statistics on the WinCo and Wal.Mart variables.
+
+###  WinCo Summary Statistics 
+```{r, echo=FALSE, message=FALSE}
+summary(grocery$WinCo)
+```
+For 29 selected items from the WinCo variable: the minimum price for an item is $0.42, the max price of an item is $12.68, and the mean price for an item is $2.48.
+
+
+### Wal.Mart Summary Statistics
+```{r, echo=FALSE, message=FALSE}
+summary(grocery$Wal.Mart)
+```
+For 29 selected items from the Wal.Mart variable: the minimum price for an item is $0.56, the max price of an item is $12.84, and the mean price for an item is $2.66. 
+
+
+## Graphing the data for Q1
+
+### Boxplots {.tabset}
+The purpose of these boxplots are to visually represent the above summary statistics.
+
+#### WinCo Boxplot
+```{r, echo=FALSE, message=FALSE, fig.width=5, fig.height=4}
+library(ggplot2)
+ggplot(grocery, aes(x=WinCo)) +
+  geom_boxplot(fill = 'red') +
+  labs(title = 'Prices at WinCo', x = 'Prices') +
+  coord_flip() +
+  theme_minimal() +
+  theme(axis.text.x = element_blank())
+```
+
+#### Wal.Mart Boxplot
+```{r, echo=FALSE, message=FALSE, fig.width=5, fig.height=4}
+library(ggplot2)
+ggplot(grocery, aes(x=Wal.Mart)) +
+  geom_boxplot(fill = 'blue') +
+  labs(title = 'Prices at Wal.Mart', x = 'Prices') +
+  coord_flip() +
+  theme_minimal() +
+  theme(axis.text.x = element_blank())
+```
+
+
+### Double Bar Plot
+The purpose of this double bar plot is to visually represent each item in the data set and directly compare their prices at each grocery stores. 
+
+```{r echo=FALSE, message=FALSE}
+library(tidyr)
+library(ggplot2)
+
+grocery_long <- pivot_longer(
+  grocery,
+  cols = c(WinCo, Wal.Mart),
+  names_to = "Store",
+  values_to = "Price"
+)
+
+ggplot(grocery_long, aes(x = Item, y = Price, fill = Store)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  scale_fill_manual(values = c("WinCo" = "orange", "Wal.Mart" = "blue")) +
+  labs(x = "Items", y = "Price", title = "Prices at WinCo and Wal.Mart") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+```
+
+## Inferential Analysis for Q1
+
+The key question for this data set is: Does the data suggest that prices tend to be higher at one chain? 
+
+Below is the hypothesis we have formed from the above statistical analysis:
+
+H~0~ : WinCo mean prices = Wal.Mart mean prices
+
+H~A~ : WinCo mean prices < Wal.Mart mean prices
+
+Using null hypothesis testing, we ran an Welch two sample t-test and got the following results: 
+
+```{r, echo=FALSE, message=FALSE}
+mean_winco <- mean(grocery$WinCo)
+mean_walmart <- mean(grocery$Wal.Mart)
+
+# Perform t-test
+t_test_result <- t.test(grocery$WinCo, grocery$Wal.Mart)
+t_test_result
+```
+
+The results from our two sample t-test yield a p-value of 0.7876 which is greater that our alpha value of 0.05.
+
+The p-value resulting from our t-test is greater than our significance level therefore, we fail to reject the null hypothesis that WinCo prices are equal to Wal.Mart prices. This means that for the same item, either grocery store will have generally the same prices for the items a customer will purchase. 
+
+
+## Conclusion for Q1
+
+The purpose of this analysis is to use the ‘grocery_prices2.csv’ data set to answer the question: Does the data suggest that prices tend to be higher at one of the chains?
+
+Our hypothesis was that the Wal.Mart variable would have higher prices compared to the WinCo variable for the 29 selected items. We chose this hypothesis after some initial research of the data through summary statistics. We saw that overall the Wal.Mart variable had the higher values for minimum, maximum, and mean compared to the WinCo variable. 
+
+We also plotted these summary statistics using box plots. The plots themselves looked very similar. To further investigate, we created a double bar chart where the x-axis represented each item at their respective grocery stores and the y-axis represents the price of that item. The double bar chart shows that a majority of the items had higher prices for the Wal.Mart variable. 
+
+To further investigate the hypothesis, we used null hypothesis testing through a two sample t-test. We found that with a confidence level of 95% that the p-value is 0.7876. Since the p-value is higher than alpha = 0.05, we fail to reject the null hypothesis which states that the prices for the 29 selected items are generally the same at both grocery stores. 
+
+Some limitations to this data analysis are that the data set could have been larger, both by rows and columns. Our results may have been different if there were more items included in the data set or if the data set included other variables like the popularity of a particular item or the number of units sold weekly of that particular item. Lastly, some of the items included, such as alcohol, can only be purchased by those who are 21 years or older, this might impact the pricing of the item. 
+
+
+# Question 3: Teen Dating Violence 
+
+The data set ‘dating_survey2.csv’ has dimensions 580 by 7. Where there are 580 rural South Carolina surveyed high school students and 7 variables which are described as:
+
+1. gender - a string record representing the gender of the student
+
+2. ethnicity - a string record representing the ethnicity of the student
+
+3. grade9 - a string record of the student's response in 9th grade to the question: "In the past year, were you the victim of physical violence in a dating relationship?" 
+
+4. grade10 - a string record of the student's response in 10th grade to the question: "In the past year, were you the victim of physical violence in a dating relationship?"
+
+5. grade11 - a string record of the student's response in 11th grade to the question: "In the past year, were you the victim of physical violence in a dating relationship?"
+
+6. grade12 - a string record of the student's response in 12th grade to the question: "In the past year, were you the victim of physical violence in a dating relationship?"
+
+7. maternal_ed - a numeric record using the following values for highest educational attainment of student’s mother: 1=less than high school diploma; 2=high school diploma or post-secondary education.
+
+Here is a peek of the data set:
+```{r, echo=FALSE, message=FALSE}
+library(readr)
+dating <- read_csv("Dating_Survey2.csv")
+head(dating)
+```
+Notice there are a notable amount of NA values for the responses of a student throughout high school. This will be further discussed; but for now, the NA values represent no response from the student during that grade. 
+
+## Initial Summary Statistics for Q3 {.tabset}
+
+### Gender
+```{r, echo=FALSE, message=FALSE}
+table(dating$gender)
+```
+
+
+### Ethinicity
+```{r, echo=FALSE, message=FALSE}
+table(dating$ethnicity)
+```
+
+### Grade 9
+```{r, echo=FALSE, message=FALSE}
+table(dating$grade9)
+sum(is.na(dating$grade9))
+```
+Note, there are 0 NA values.
+
+### Grade 10
+```{r, echo=FALSE, message=FALSE}
+table(dating$grade10)
+sum(is.na(dating$grade10))
+```
+Note, there are 58 NA values.
+
+### Grade 11
+
+```{r, echo=FALSE, message=FALSE}
+table(dating$grade11)
+sum(is.na(dating$grade11))
+```
+Note, there are 74 NA values.
+
+### Grade 12
+```{r, echo=FALSE, message=FALSE}
+table(dating$grade12)
+sum(is.na(dating$grade12))
+```
+Note, there are 104 NA values.
+
+### Maternal Education 
+```{r, echo=FALSE, message=FALSE}
+table(dating$maternal_ed)
+```
+
+## Cleaning the Data for Q3
+
+To deal with the abundance of NA values, we created a new column called ‘LostToFollowUp’. The column contains ‘False’
+if the student was lost to followup in Grade 12. The column contains ‘True’ if they were lost to follow
+up in grades 10 or 11. Other ‘NA’ values in the columns Grade9, Grade10, and Grade11 were not removed because
+the instructions only specified that a student is considered lost to follow-up if they did not respond in
+Grade 12.
+
+Also, we will need to remove all rows where maternal education has a NA value.
+```{r, echo=FALSE, message=FALSE}
+dating <- dating[complete.cases(dating$maternal_ed), ]
+```
+
+
+Here is a peek at the cleaned data set:
+```{r, echo=FALSE, message=FALSE}
+dating$LostToFollowUp <- is.na(dating$grade12)
+head(dating)
+```
+
+
+
+## Inferential Analysis for Q3
+
+The key question for this data set is: Were students of level 1 maternal education more likely to be lost to follow-up than those from level 2?
+
+Now, we will further investigate our data.
+
+### Tables and Graphs {.tabset}
+
+#### Table of Maternal Education and Lost to Follow-Up
+```{r, echo=FALSE, message=FALSE}
+table(dating$maternal_ed, dating$LostToFollowUp)
+```
+Here, we see that the number of lost to follow up for the maternal education level 2 was significantly higher than level 1.
+
+#### Probability Table of Maternal Education and Lost to Follow-Up
+```{r, echo=FALSE, message=FALSE}
+prop.table(table(dating$maternal_ed, dating$LostToFollowUp), 1)
+```
+Here, we see that the probability of lost to follow up for both maternal levels are not significantly different; but the lost to follow up probability for maternal education level 1 is slightly higher than level 2.
+
+#### Summary Statistics for Maternal Education 
+```{r, echo=FALSE, message=FALSE}
+summary(dating$maternal_ed)
+```
+
+Since we are testing how maternal education has an impact on lost to follow up. It will be important to remove the rows in which maternal education has NA. 
+
+#### Summary of Lost to Follow-Up
+```{r, echo=FALSE, message=FALSE}
+summary(dating$LostToFollowUp)
+```
+We see there are 103 students that were lost to follow up. 
+
+#### Frequency of Students Lost to Follow-Up by Maternal Education Level Bar Chart
+```{r, echo=FALSE, message=FALSE}
+freq_table <- table(dating$maternal_ed, dating$LostToFollowUp)
+library(ggplot2)
+
+freq_df <- as.data.frame(freq_table)
+names(freq_df) <- c("MaternalEducation", "LostToFollowUp", "Count")
+
+ggplot(freq_df, aes(x = MaternalEducation, y = Count, fill = LostToFollowUp)) +
+  geom_bar(stat = "identity", position = position_dodge()) +
+  geom_text(aes(label = Count), vjust = -0.5, position = position_dodge(width = 0.9)) +
+  labs(title = "Frequency of Students Lost to Follow-Up by Maternal Education Level",
+       x = "Maternal Education Level",
+       y = "Count") +
+  scale_fill_discrete(name = "Lost to Follow-Up")
+```
+
+#### Proportion of Students Lost to Follow-Up by Maternal Education Level Bar Chart
+```{r, echo=FALSE, message=FALSE}
+prop_table <- prop.table(table(dating$maternal_ed, dating$LostToFollowUp), 1)
+prop_df <- as.data.frame(prop_table)
+names(prop_df) <- c("MaternalEducation", "LostToFollowUp", "Proportion")
+
+ggplot(prop_df, aes(x = MaternalEducation, y = Proportion, fill = LostToFollowUp)) +
+  geom_bar(stat = "identity", position = position_dodge()) +
+  geom_text(aes(label = round(Proportion, digits = 3)), vjust = -0.5, position = position_dodge(width = 0.9)) +
+  labs(title = "Proportion of Students Lost to Follow-Up by Maternal Education Level",
+       x = "Maternal Education Level",
+       y = "Proportion") +
+  scale_fill_discrete(name = "Lost to Follow-Up")
+```
+
+### Hypothesis Testing
+
+H~0~ : The level of maternal education has no significant effect on the rate of students lost to follow-up.
+
+H~A~ : The level of maternal education has a significant effect on the rate of students lost to follow-up.
+
+For hypothesis testing, we will use the Chi-squared test: 
+```{r, echo=FALSE, message=FALSE}
+chisq_test <- chisq.test(table(dating$maternal_ed, dating$LostToFollowUp))
+print(chisq_test)
+```
+Since the p-value of 0.7354 is greater than the alpha of 0.05, we conclude that we have insufficient evidence to reject the null hypothesis.
+
+## Conclusion 
+
+The initial question we set out to answer was whether maternal education level had a 
+substantive Impact on whether a student was lost to follow up in the survey during the 12th grade.
+We hypothesized that maternal education level may have an impact on whether a student was lost
+to follow up. This was theorized because if levels of education correlate from mother to child, and a mother
+did not complete high school, their child is less likely to finish high school. That student may be less
+likely to be in high school during 12th grade and thus more difficult to locate for those completing the
+survey.
+
+The proportion plot shows the ratio of students lost to follow up by maternal education level. The
+levels of students lost to follow up appear to be very similar between both levels of maternal education.
+
+We used R to calculate the p-value for the association between maternal education and students who were lost to follow up. The p-value was calculated to be 0.7354. This was greater than the alpha for our specified significance level of 95%, thus we were unable to reject our null hypothesis.
+
+The data could be improved by obtaining information about both parents' education level, as well as more specific data about that education level. For example, query both of a high school student’s parents' level of education with separate categories for less than high school, high school, associates degree, bachelor's degree, and postgraduate degrees.
+
